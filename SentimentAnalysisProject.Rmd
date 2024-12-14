@@ -1,0 +1,122 @@
+---
+title: "SentimentAnalysisProject_Sobusa_Tamonan_Delgado.Rmd"
+author: "Nexon Sobusa"
+date: "2024-12-14"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+```
+
+```{r}
+tweets_df <- read.csv("C:/Users/kurts/Desktop/SentimentAnalysis/tweetsDF.csv")
+```
+
+```{r}
+# Remove duplicates
+tweets_df <- tweets_df %>%
+  distinct()
+```
+
+```{r}
+missing_values <- colSums(is.na(tweets_df))
+```
+
+```{r}
+# Clean the text column
+tweets_df$text <- tweets_df$text %>%
+  str_replace_all("http\\S+|www\\.\\S+", "") %>% # Remove URLs
+  str_replace_all("[^[:alnum:][:space:]]", "") %>% # Remove special characters
+  str_squish() # Remove extra whitespaces
+```
+
+```{r}
+print(head(tweets_df))
+```
+
+```{r}
+print(missing_values)
+```
+
+```{r}
+# Trend Analysis
+install.packages("lubridate")
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+```
+
+
+```{r}
+tweets_df$created <- ymd_hms(tweets_df$created)
+```
+
+```{r}
+daily_trend <- tweets_df %>%
+  mutate(date = as_date(created)) %>%
+  group_by(date) %>%
+  summarise(tweet_count = n())
+```
+
+
+```{r}
+ggplot(daily_trend, aes(x = date, y = tweet_count)) +
+  geom_line(color = "black", linewidth = 1) +
+  labs(
+    title = "Daily Tweet Trend",
+    x = "Date",
+    y = "Number of Tweets"
+  ) +
+  theme_minimal()
+
+
+```
+
+
+```{r}
+# Sentimental Analysis
+install.packages("tidytext")
+```
+
+```{r}
+library(dplyr)
+library(tidytext)
+library(ggplot2)
+```
+
+```{r}
+bing_lexicon <- get_sentiments("bing")
+```
+
+```{r}
+tokenized_tweets <- tweets_df %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words)
+```
+
+```{r}
+sentiment_analysis <- tokenized_tweets %>%
+  inner_join(bing_lexicon, by = "word") %>%
+  count(sentiment) %>%
+  mutate(percent = n / sum(n) * 100)
+```
+
+```{r}
+ggplot(sentiment_analysis, aes(x = sentiment, y = percent, fill = sentiment)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Sentiment Analysis of Tweets",
+    x = "Sentiment",
+    y = "Percentage of Words"
+  ) +
+  theme_minimal()
+```
