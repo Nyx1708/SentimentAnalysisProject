@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 #install.packages("lubridate")
 #install.packages("tidytext")
-
 library(dplyr)
 library(stringr)
 library(ggplot2)
@@ -21,7 +20,7 @@ library(tidytext)
 ```
 
 ```{r}
-tweets_data <- read.csv("D:/SentimentAnalysisProject/tweetsDF.csv")
+tweets_data <- read.csv("C:/Users/kurts/Desktop/SentimentAnalysis/tweetsDF.csv")
 ```
 
 ```{r}
@@ -44,7 +43,6 @@ tweets_data$text <- tweets_data$text %>%
 
 ```{r}
 print(head(tweets_data))
-
 ```
 
 ```{r}
@@ -53,7 +51,17 @@ print(missing_values_count)
 
 ```{r}
 # Trend Analysis
+install.packages("lubridate")
+print(missing_values_count)
 ```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+# Trend Analysis
+```
+
 
 ```{r}
 tweets_data$created_at <- ymd_hms(tweets_data$created)
@@ -66,6 +74,7 @@ daily_tweet_counts <- tweets_data %>%
   summarise(tweet_count = n())
 ```
 
+
 ```{r}
 ggplot(daily_tweet_counts, aes(x = tweet_date, y = tweet_count)) +
   geom_line(color = "black", linewidth = 1) +
@@ -77,8 +86,16 @@ ggplot(daily_tweet_counts, aes(x = tweet_date, y = tweet_count)) +
   theme_minimal()
 ```
 
+
 ```{r}
 # Sentimental Analysis
+install.packages("tidytext")
+```
+
+```{r}
+library(dplyr)
+library(tidytext)
+library(ggplot2)
 ```
 
 ```{r}
@@ -86,9 +103,10 @@ bing_sentiment_lexicon <- get_sentiments("bing")
 ```
 
 ```{r}
+# Tokenize the tweets and remove stop words
 tweet_words <- tweets_data %>%
   unnest_tokens(word, text) %>%
-  anti_join(stop_words, by = join_by(word))
+  anti_join(stop_words)
 ```
 
 ```{r}
@@ -104,7 +122,7 @@ ggplot(sentiment_results, aes(x = sentiment, y = percent, fill = sentiment)) +
   labs(
     title = "Sentiment Analysis of Tweets",
     x = "Sentiment",
-    y = "Percentage of Words"
+    y = "Percentage"
   ) +
   theme_minimal()
 ```
